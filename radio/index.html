@@ -1,119 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Music Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Top bar -->
-  <header class="top-bar">
-    <div class="top-left">
-      <img src="profile.jpg" alt="Profile" class="profile-icon" />
-      <div class="title-wrap">
-        <h1>Hey, this is my song</h1>
-        <p id="greeting" class="subtext">Good Morning</p>
-      </div>
-    </div>
-
-    <div class="top-right">
-      <div id="current-time" class="subtext">00:00:00</div>
-      <div id="current-mode" class="mode-indicator">
-        <span id="mode-icon">🎵</span>
-        <span id="mode-text">Now in: Playlist Mode</span>
-      </div>
-    </div>
+  <header class="topbar">
+    <h1>Music Space</h1>
   </header>
 
-  <main class="dashboard">
-    <!-- LEFT: context column -->
-    <section class="context">
+  <div class="dashboard-container">
+    <!-- Player Section -->
+    <section class="player-section">
+      <div class="album-card">
+        <div class="album-art-wrapper">
+          <img id="album-cover" src="album.jpg" alt="Album Cover">
+          <button id="play-btn" class="play-btn">▶</button>
+        </div>
+
+        <div class="track-info">
+          <h2 id="song-title">Song Name</h2>
+          <p class="requester">Requested by <span id="requester-name">User</span></p>
+          <p id="song-reason">“This song makes me feel alive.”</p>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div id="playlist-progress" class="progress-fill">
+            </div>
+          </div>
+          <p class="timer">Time Remaining: <span id="playlist-timer">0:00</span></p>
+        </div>
+      </div>
+
+      <!-- Visualizer -->
+      <div class="visualizer">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
       <div class="card greeting-card">
-        <!-- greeting already shown in header; keep a larger card for emphasis -->
-        <h2>Welcome</h2>
-        <p id="greeting-card-text">Have a great session — press play to start.</p>
+        <h3 id="greeting">Good Morning ☀️</h3>
+        <p id="fact">This song reminds them of summer mornings and long drives.</p>
       </div>
 
       <div class="card weather-card">
-        <h2>Weather</h2>
-        <p id="weather">Loading...</p>
-      </div>
-
-      <div class="card fact-card">
-        <h2>Interesting Fact</h2>
-        <p id="fact">Why this person chose the song…</p>
+        <h3>🌤 Weather</h3>
+        <p id="weather">Durban — 25°C | Sunny</p>
       </div>
 
       <div class="card upcoming-card">
-        <h2>Upcoming Songs</h2>
+        <h3>🎶 Upcoming Songs</h3>
         <ul id="upcoming-songs-list" class="upcoming-list">
-          <!-- populated by JS -->
+          <li>Track A — Requested by Alex</li>
+          <li>Track B — Requested by Jamie</li>
+          <li>Track C — Requested by Kai</li>
         </ul>
       </div>
-    </section>
+    </aside>
+  </div>
 
-    <!-- RIGHT: interactive music controls -->
-    <section class="interactive">
-      <!-- Playlist Card -->
-      <div id="playlist-card" class="card mode-card active">
-        <h2>My Playlist</h2>
 
-        <div class="album-row">
-          <div class="media-wrapper">
-            <img id="album-cover" src="album.jpg" alt="Album Cover" />
-            <button id="play-btn" class="play-btn">▶</button>
-          </div>
-
-          <div class="meta">
-            <p class="now-playing">Now Playing: <strong id="song-title">Song Name</strong></p>
-            <p>Requested by: <span id="requester-name">User</span></p>
-            <p>Why: <span id="song-reason">Favorite song reason</span></p>
-
-            <div class="progress-bar">
-              <div id="playlist-progress" class="progress-fill"><span class="progress-text">0%</span></div>
-            </div>
-
-            <p class="timer">Time Remaining: <span id="playlist-timer">240 mins</span></p>
-          </div>
-        </div>
-
-        <audio id="playlist-player"></audio>
-
-        <div class="upcoming-inline">
-          <h3>Upcoming</h3>
-          <ul id="upcoming-songs-list-inline" class="upcoming-list-inline"></ul>
-        </div>
-      </div>
-
-      <!-- Radio Card -->
-      <div id="radio-card" class="card mode-card inactive">
-        <h2>LIVE RADIO — East Coast Radio</h2>
-
-        <div class="album-row">
-          <div class="media-wrapper">
-            <img id="radio-logo" src="radio-logo.png" alt="Radio Logo" />
-            <button id="radio-play-btn" class="play-btn">▶</button>
-          </div>
-
-          <div class="meta">
-            <p class="now-playing">Now Streaming: <strong id="radio-now">Live Stream</strong></p>
-
-            <div class="progress-bar">
-              <div id="radio-progress" class="progress-fill radio-fill"><span class="progress-text">0%</span></div>
-            </div>
-
-            <p class="timer">Time Remaining: <span id="radio-timer">240 mins</span></p>
-          </div>
-        </div>
-
-        <audio id="radio-player">
-          <source src="https://www.ecr.co.za/listen-live/" type="audio/mpeg" />
-        </audio>
-      </div>
-    </section>
-  </main>
-
+  <audio id="playlist-player"></audio>
+  <audio id="radio-player" src="https://edge.iono.fm/xice/9_medium.aac"></audio>
   <script src="app.js"></script>
 </body>
 </html>

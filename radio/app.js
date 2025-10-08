@@ -1,11 +1,12 @@
 // Elements
 const albumCoverEl = document.getElementById('album-cover');
 const playBtn = document.getElementById('play-btn');
-const currentTrackEl = document.getElementById('current-track');
-const progressFillEl = document.getElementById('progress-fill');
-const timerEl = document.getElementById('timer');
+const currentTrackEl = document.getElementById('song-title'); // or create a new element with id="current-track"
+const progressFillEl = document.getElementById('playlist-progress');
+const timerEl = document.getElementById('playlist-timer');
 const weatherEl = document.getElementById('weather');
-const upcomingSongsList = document.getElementById('upcoming');
+const upcomingSongsList = document.getElementById('upcoming-songs-list');
+
 
 // Audio players
 const playlistPlayer = new Audio();
@@ -126,37 +127,45 @@ playBtn.addEventListener("click", () => {
 // ----- Timer & progress -----
 function startTimer(minutes, onFinish) {
   clearInterval(timerInterval);
-  let totalSeconds = minutes * 60;
-  let elapsed = 0;
-  timerInterval = setInterval(() => {
-    totalSeconds--;
-    elapsed++;
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    timerEl.textContent = `${mins}m ${secs}s`;
-    const percent = Math.min(100, Math.floor((elapsed / (minutes * 60)) * 100));
+  
+  const totalSeconds = minutes * 60;
+  const startTime = Date.now();
+
+  function update() {
+    const elapsed = (Date.now() - startTime) / 1000; // seconds
+    const percent = Math.min(100, (elapsed / totalSeconds) * 100);
     progressFillEl.style.width = `${percent}%`;
-    progressFillEl.querySelector(".progress-text").textContent = `${percent}%`;
-    if (totalSeconds <= 0) {
-      clearInterval(timerInterval);
+
+    const remainingSeconds = Math.max(0, totalSeconds - elapsed);
+    const mins = Math.floor(remainingSeconds / 60);
+    const secs = Math.floor(remainingSeconds % 60);
+    timerEl.textContent = `${mins}m ${secs}s`;
+
+    if (remainingSeconds > 0) {
+      timerInterval = requestAnimationFrame(update);
+    } else {
       onFinish();
     }
-  }, 1000);
+  }
+
+  update();
 }
+
+
 
 // ----- Mode switching -----
 function switchToPlaylist() {
   currentMode = "playlist";
   radioPlayer.pause();
   loadNextPlaylistSong();
-  startTimer(10, switchToRadio); // 10 min for testing
+  startTimer(3, switchToRadio); // 3 minutes for testing
 }
 
 function switchToRadio() {
   currentMode = "radio";
   playlistPlayer.pause();
   radioPlayer.play().catch(() => console.log("Radio playback blocked"));
-  albumCoverEl.src = "radio.jpg";
+  albumCoverEl.src = "https://via.placeholder.com/250x250.png?text=Radio";
   currentTrackEl.textContent = "East Coast Radio Live";
   startTimer(10, switchToPlaylist);
 }
@@ -167,3 +176,9 @@ async function init() {
   switchToPlaylist();
 }
 init();
+
+window.addEventListener("click", () => {
+  if (!isPlaying) {
+    playlistPlayer.play().catch(() => {});
+  }
+}, { once: true });
