@@ -10,7 +10,11 @@ const upcomingSongsList = document.getElementById('upcoming-songs-list');
 
 // Audio players
 const playlistPlayer = new Audio();
-const radioPlayer = new Audio("https://edge.iono.fm/xice/9_medium.aac"); // East Coast Radio
+const radioPlayer = new Audio();
+radioPlayer.src = "https://edge.iono.fm/xice/ecr_live_high.aac";
+radioPlayer.type = "audio/aac";
+radioPlayer.crossOrigin = "anonymous";
+// East Coast Radio
 
 let playlist = [];
 let currentSongIndex = 0;
@@ -32,30 +36,25 @@ setGreeting();
 setInterval(setGreeting, 1000);
 
 // ----- Weather (OpenWeather) -----
-async function fetchWeather() {
+async function fetchWeatherForecast() {
   const apiKey = "a1465b9cf29f2e1c9741c98993c0bf1d";
   const city = "Durban";
-  try {
-    const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-        city
-      )}&units=metric&appid=${apiKey}`
-    );
-    const data = await res.json();
-    if (data && data.weather && data.main) {
-      const desc = data.weather[0].description;
-      const temp = Math.round(data.main.temp);
-      weatherEl.textContent = `${desc.charAt(0).toUpperCase() + desc.slice(1)}, ${temp}°C — ${city}`;
-    } else {
-      weatherEl.textContent = "Weather not available";
-    }
-  } catch (err) {
-    console.error("Weather fetch error:", err);
-    weatherEl.textContent = "Weather not available";
-  }
+  const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=24&appid=${apiKey}`);
+  const data = await res.json();
+  
+  const forecasts = data.list.slice(0, 3).map(f => ({
+    temp: Math.round(f.main.temp),
+    desc: f.weather[0].main,
+    date: new Date(f.dt_txt).toLocaleDateString("en-ZA", { weekday: "short" })
+  }));
+
+  document.getElementById('weather').innerHTML = forecasts
+    .map(f => `${f.date}: ${f.desc}, ${f.temp}°C`)
+    .join('<br>');
 }
-fetchWeather();
-setInterval(fetchWeather, 10 * 60 * 1000);
+fetchWeatherForecast();
+setInterval(fetchWeatherForecast, 30 * 60 * 1000);
+
 
 // ----- Playlist fetch/load -----
 async function fetchPlaylist() {
@@ -78,6 +77,24 @@ async function fetchPlaylist() {
 }
 fetchPlaylist();
 
+async function fetchQuote() {
+  const res = await fetch("https://api.quotable.io/random");
+  const data = await res.json();
+  document.getElementById("fact").textContent = `"${data.content}" — ${data.author}`;
+}
+fetchQuote();
+setInterval(fetchQuote, 60 * 60 * 1000);
+
+
+async function fetchNews() {
+  const res = await fetch(`https://newsdata.io/api/1/news?apikey=pub_XXXXX&country=za&language=en`);
+  const data = await res.json();
+  const headlines = data.results.slice(0, 3)
+    .map(a => `<li>${a.title}</li>`)
+    .join('');
+  document.getElementById("news-list").innerHTML = headlines;
+}
+
 // ----- Upcoming songs -----
 function loadUpcomingSongs() {
   upcomingSongsList.innerHTML = "";
@@ -88,6 +105,20 @@ function loadUpcomingSongs() {
     upcomingSongsList.appendChild(li);
   });
 }
+async function fetchNowPlaying() {
+  try {
+    const res = await fetch("https://api.allorigins.win/raw?url=https://stream.iono.fm/xice/ecr_live_medium.aac");
+    const data = await res.json();
+    const current = data[0]?.now_playing;
+    if (current) {
+      document.getElementById('song-title').textContent = `${current.artist} — ${current.title}`;
+      document.getElementById('album-cover').src = current.cover || 'radio-logo.png';
+    }
+  } catch (e) {
+    console.error('Now playing fetch error:', e);
+  }
+}
+setInterval(fetchNowPlaying, 10000);
 
 // ----- Load playlist song -----
 function loadNextPlaylistSong() {
@@ -158,7 +189,7 @@ function switchToPlaylist() {
   currentMode = "playlist";
   radioPlayer.pause();
   loadNextPlaylistSong();
-  startTimer(3, switchToRadio); // 3 minutes for testing
+  startTimer(0.1, switchToRadio); // 3 minutes for testing
 }
 
 function switchToRadio() {
@@ -178,7 +209,6 @@ async function init() {
 init();
 
 window.addEventListener("click", () => {
-  if (!isPlaying) {
-    playlistPlayer.play().catch(() => {});
-  }
+  radioPlayer.play().catch(err => console.log("Autoplay blocked:", err));
 }, { once: true });
+
